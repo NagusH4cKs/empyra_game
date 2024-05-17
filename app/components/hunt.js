@@ -6,13 +6,14 @@ import Background from './background'
 
 export default function Hunt(props) {
     const inputRef = useRef(null);
-    const [ userInput, setUserInput] = useState("")
+    const [userInput, setUserInput] = useState("")
     const [currentQuestion, setQuestion] = useState(null)
     const [completed, setCompleted] = useState(false)
     const [player, setPlayer] = useState('')
+    const [currentIndex, setCurrentIndex] = useState(0)
 
     useEffect(() => {
-        const nextQuestion = questions.find(i=>i.key === 0)
+        const nextQuestion = questions.find(i => i.key === 0)
         setQuestion(nextQuestion)
     }, [])
 
@@ -20,18 +21,19 @@ export default function Hunt(props) {
         e.preventDefault();
         const key = currentQuestion.solution;
         let hash = sha256.create().update(userInput.toLowerCase()).hex();
-        const isCorrect = hash===key;
-        if(isCorrect) {
-            const nextHash = sha256.create().update(hash).hex();
-
+        const isCorrect = hash === key;
+        if (isCorrect) {
+            setCurrentIndex(p => p + 1)
+            // const nextHash = sha256.create().update(hash).hex();
+            const nextHash = currentIndex + 1;
             //end condition - player has finished the last question
-            if(nextHash === finalHash) {
+            if (nextHash === 15) {
                 setCompleted(true)
                 return
             }
 
-            const nextQuestion = questions.find(i=>i.key === nextHash);
-            if(!nextQuestion) {
+            const nextQuestion = questions.find(i => i.key === nextHash);
+            if (!nextQuestion) {
                 //throw error
                 alert(`couldn't find next question, please contact admin`);
             }
@@ -47,17 +49,17 @@ export default function Hunt(props) {
         setTimeout(() => inputRef.current.className = '', 1500)
     }
 
-    if(!currentQuestion)
-    return null;
+    if (!currentQuestion)
+        return null;
 
-    if(completed) {
+    if (completed) {
         return (
             <>
                 <Background />
                 <div className="winContainer">
-                    <h1 className="header">You have<br/>finished.</h1>
+                    <h1 className="header">You have<br />finished.</h1>
                     <div className="winPrompt">
-                        Share this screen on Teams<br/>to mark completion.<br/><br/><b>Congrats {player}!</b>
+                        Share this screen on Teams<br />to mark completion.<br /><br /><b>Congrats {player}!</b>
                     </div>
                 </div>
             </>
@@ -69,15 +71,15 @@ export default function Hunt(props) {
             <Background />
             <div className="container">
                 <div className="prompt">
-                <h3 aria-label='imjustaprompt'>
-                    {currentQuestion.title}
-                </h3>
-                {
-                    currentQuestion.body &&
-                    <h5 className="promptBody">
-                        {currentQuestion.body}
-                    </h5>
-                }
+                    <h3 aria-label='imjustaprompt'>
+                        {currentQuestion.title}
+                    </h3>
+                    {
+                        currentQuestion.body &&
+                        <h5 className="promptBody">
+                                {currentQuestion.body !== "" && <img src={currentQuestion.body} /> }
+                        </h5>
+                    }
                 </div>
                 <form onSubmit={checkPassword}>
                     <input
@@ -85,7 +87,7 @@ export default function Hunt(props) {
                         id="primaryInput"
                         placeholder={"TYPE HERE"}
                         value={userInput}
-                        onChange={(e)=>setUserInput(e.target.value)}
+                        onChange={(e) => setUserInput(e.target.value)}
                         autoFocus
                         autoComplete="false"
                         autoCorrect="false"
